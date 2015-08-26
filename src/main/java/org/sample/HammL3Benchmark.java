@@ -16,17 +16,10 @@ import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Timeout;
 import org.openjdk.jmh.annotations.Warmup;
 
-/**
- * Запуск бенчмарка:
- * <pre>
- * $ mvn clean install
- * $ java -jar target/benchmarks.jar
- * </pre>
- */
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Timeout(time = 30, timeUnit = TimeUnit.SECONDS)
-@Threads(value = 1)
+@Threads(value = 24)
 @Warmup(iterations = 1, time = 10, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 2, time = 10, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, warmups = 1, jvmArgs = {"-Xms2048m", "-Xmx2048m", "-XX:MaxDirectMemorySize=512M"})

@@ -2,10 +2,20 @@ h1. Descriptions
 
 This algorithms splits 64-bits long value into four 16-bit sections. We count the number of bits in
 each section so we get 4 counters in range [0..16]. So any value could be referred to a bag with
-septendecimal bag-id in range [0000@x17...GGGG@x17] (numbers are in 17-base format).
+septendecimal bag-id in range [0000@x17...GGGG@x17] (numbers are in 17-base format). The total number
+of bags is 17^4=83521
 
-When we search for a value with distance we can determine the according range of bag-ids and
+When we search for a value with hamming distance we determine the according range of bag-ids and
 sequentially scan value arrays in all these bags for proper values.
+
+Some optimitizations are implemented to skip bags with incompatible bit structure.
+
+h1. How to run
+
+```
+$ mvn clean install
+$ java -jar target/benchmarks.jar
+```
 
 h1. Becnhmark results
 
