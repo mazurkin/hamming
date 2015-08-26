@@ -1,4 +1,4 @@
-h1. Descriptions
+# Descriptions
 
 This algorithms splits 64-bits long value into four 16-bit sections. We count the number of bits in
 each section so we get 4 counters in range [0..16]. So any value could be referred to a bag with
@@ -10,16 +10,16 @@ sequentially scan value arrays in all these bags for proper values.
 
 Some optimitizations are implemented to skip bags with incompatible bit structure.
 
-h1. How to run
+# How to run
 
 ```
 $ mvn clean install
 $ java -jar target/benchmarks.jar
 ```
 
-h1. Becnhmark results
+# Becnhmark results
 
-h2. Thread count: 1
+## Thread count: 1
 
 ```
 Benchmark                  (count)  (distance)  Mode  Cnt  Score   Error  Units
@@ -35,7 +35,7 @@ HammL3Benchmark.count     50000000           8  avgt    2  1.929          ms/op
 HammL3Benchmark.count     50000000          16  avgt    2  2.199          ms/op
 ```
 
-h2. Thread count: 24
+## Thread count: 24
 
 ```
 Benchmark                  (count)  (distance)  Mode  Cnt   Score   Error  Units
@@ -51,7 +51,7 @@ HammL3Benchmark.count     50000000           8  avgt    2  25.363          ms/op
 HammL3Benchmark.count     50000000          16  avgt    2  29.107          ms/op
 ```
 
-h2. Thread count: 24 (RWLock in HammL3Cell)
+## Thread count: 24 (RWLock in HammL3Cell)
 
 ```
 Benchmark                  (count)  (distance)  Mode  Cnt   Score   Error  Units
