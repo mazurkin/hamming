@@ -1,5 +1,9 @@
 package org.sample;
 
+import java.lang.reflect.Field;
+
+import sun.misc.Unsafe;
+
 public class HammL3Cell {
 
     private static final double[] FACTORIALS = {
@@ -30,6 +34,12 @@ public class HammL3Cell {
 
     private static final int CHECK_COUNTS_SIZE = 32;
 
+    private static final int VALUE_SIZE = 8;
+
+    private static final int PAYLOAD_SIZE = 8;
+
+    private static final Unsafe UNSAFE = getUnsafe();
+
     private final int bitCount;
 
     private final int bitCount1;
@@ -40,9 +50,9 @@ public class HammL3Cell {
 
     private final int bitCount4;
 
-    private long[] values;
+    private long valuesPtr;
 
-    private long[] payloads;
+    private long payloadsPtr;
 
     private int capacity;
 
@@ -92,53 +102,73 @@ public class HammL3Cell {
         this.capacity = capacity;
 
         // Выделяем массивы - под хэши и полезную нагрузку
-        this.values = new long[capacity];
-        this.payloads = new long[capacity];
+        this.valuesPtr = UNSAFE.allocateMemory(capacity * VALUE_SIZE);
+        this.payloadsPtr = UNSAFE.allocateMemory(capacity * PAYLOAD_SIZE);
     }
 
-    public void destroy() {
-        // do nothing
+    public synchronized void destroy() {
+        UNSAFE.freeMemory(this.valuesPtr);
+        UNSAFE.freeMemory(this.payloadsPtr);
+
+        this.valuesPtr = 0;
+        this.payloadsPtr = 0;
     }
 
     public synchronized void add(long value) {
         if (size == capacity) {
             int newCapacity = capacity * 2;
 
-            long[] newValues = new long[newCapacity];
-            long[] newPayloads = new long[newCapacity];
+            long newValuesPtr = UNSAFE.allocateMemory(newCapacity * VALUE_SIZE);
+            long newPayloadsPtr = UNSAFE.allocateMemory(newCapacity * PAYLOAD_SIZE);
 
-            System.arraycopy(values, 0, newValues, 0, size);
-            System.arraycopy(payloads, 0, newPayloads, 0, size);
+            UNSAFE.copyMemory(this.valuesPtr, newValuesPtr, size * VALUE_SIZE);
+            UNSAFE.copyMemory(this.payloadsPtr, newPayloadsPtr, size * PAYLOAD_SIZE);
 
-            this.values = newValues;
-            this.payloads = newPayloads;
+            UNSAFE.freeMemory(this.valuesPtr);
+            UNSAFE.freeMemory(this.payloadsPtr);
+
+            this.valuesPtr = newValuesPtr;
+            this.payloadsPtr = newPayloadsPtr;
+
             this.capacity = newCapacity;
         }
 
+        long valuesRunner = this.valuesPtr;
         for (int i = 0; i < size; i++) {
-            if (values[i] == value) {
+            if (UNSAFE.getLong(valuesRunner) == value) {
                 return;
             }
+
+            valuesRunner += VALUE_SIZE;
         }
 
-        values[size] = value;
-        payloads[size] = 0;
+        UNSAFE.putLong(this.valuesPtr + size * VALUE_SIZE, value);
+        UNSAFE.putLong(this.payloadsPtr + size * PAYLOAD_SIZE, 0);
 
         size++;
     }
 
     public synchronized void remove(long value) {
+        long valuesRunner = valuesPtr;
         for (int i = 0; i < size; i++) {
-            if (values[i] == value) {
+            if (UNSAFE.getLong(valuesRunner) == value) {
                 if (i < size - 1) {
-                    values[i] = values[size - 1];
-                    payloads[i] = payloads[size - 1];
+                    UNSAFE.copyMemory(
+                            this.valuesPtr + (size - 1) * VALUE_SIZE,
+                            this.valuesPtr + i * VALUE_SIZE,
+                            VALUE_SIZE);
+                    UNSAFE.copyMemory(
+                            this.payloadsPtr + (size - 1) * PAYLOAD_SIZE,
+                            this.payloadsPtr + i * PAYLOAD_SIZE,
+                            PAYLOAD_SIZE);
                 }
 
                 size--;
 
                 break;
             }
+
+            valuesRunner += VALUE_SIZE;
         }
     }
 
@@ -150,14 +180,17 @@ public class HammL3Cell {
         long value = context.value;
         int distance = context.distance;
 
+        long valuesRunner = this.valuesPtr;
         for (int i = 0; i < size; i++) {
-            long xor = value ^ values[i];
+            long xor = value ^ UNSAFE.getLong(valuesRunner);
 
             int bitCount = Long.bitCount(xor);
 
             if (bitCount <= distance) {
                 return true;
             }
+
+            valuesRunner += VALUE_SIZE;
         }
 
         return false;
@@ -172,14 +205,17 @@ public class HammL3Cell {
         int distance = context.distance;
         int counter = 0;
 
+        long valuesRunner = this.valuesPtr;
         for (int i = 0; i < size; i++) {
-            long xor = value ^ values[i];
+            long xor = value ^ UNSAFE.getLong(valuesRunner);
 
             int bitCount = Long.bitCount(xor);
 
             if (bitCount <= distance) {
                 counter++;
             }
+
+            valuesRunner += VALUE_SIZE;
         }
 
         return counter;
@@ -226,4 +262,14 @@ public class HammL3Cell {
         return true;
     }
 
+    @SuppressWarnings("restriction")
+    private static Unsafe getUnsafe() {
+        try {
+            Field singleoneInstanceField = Unsafe.class.getDeclaredField("theUnsafe");
+            singleoneInstanceField.setAccessible(true);
+            return (Unsafe) singleoneInstanceField.get(null);
+        } catch (Exception e) {
+            throw new IllegalStateException("Fail to get the Unsafe instance");
+        }
+    }
 }

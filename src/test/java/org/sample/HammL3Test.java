@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,6 +32,11 @@ public class HammL3Test {
         for (long l : values) {
             this.hamm.add(l);
         }
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        this.hamm.destroy();
     }
 
     @Test
