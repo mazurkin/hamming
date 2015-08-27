@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import junit.framework.Assert;
@@ -15,53 +15,53 @@ public class HammL3Test {
 
     private static final int CAPACITY = 10000;
 
-    private Set<Long> values;
+    private static Set<Long> values;
 
-    private HammL3 hamm;
+    private static HammL3 hamm;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         Random random = new Random(1);
 
-        this.values = new HashSet<Long>(CAPACITY * 2);
+        values = new HashSet<Long>(CAPACITY * 2);
         for (int i = 0; i < CAPACITY; i++) {
-            this.values.add(random.nextLong());
+            values.add(random.nextLong());
         }
 
-        this.hamm = new HammL3();
+        hamm = new HammL3();
         for (long l : values) {
-            this.hamm.add(l);
+            hamm.add(l);
         }
     }
 
-    @After
-    public void tearDown() throws Exception {
-        this.hamm.destroy();
+    @AfterClass
+    public static void tearDown() throws Exception {
+        hamm.destroy();
     }
 
     @Test
-    public void testContains() throws Exception {
-        System.out.println("Checking distance = 0");
+    public void testContainsDistance0() throws Exception {
         for (long l : values) {
             Assert.assertTrue(hamm.contains(l, 0));
         }
+    }
 
-        System.out.println("Checking distance = 1");
+    @Test
+    public void testContainsDistance1() throws Exception {
         for (long l : values) {
             Assert.assertTrue(hamm.contains(l, 1));
         }
+    }
 
-        System.out.println("Checking distance = 2");
+    @Test
+    public void testContainsDistance2() throws Exception {
         for (long l : values) {
             Assert.assertTrue(hamm.contains(l, 2));
         }
+    }
 
-        System.out.println("Checking distance = 4");
-        for (long l : values) {
-            Assert.assertTrue(hamm.contains(l, 4));
-        }
-
-        System.out.println("Checking missing");
+    @Test
+    public void testMissing() {
         Random random = new Random(1);
         for (int i = 0; i < CAPACITY; ) {
             long l = random.nextLong();

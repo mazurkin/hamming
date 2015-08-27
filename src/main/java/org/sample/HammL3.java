@@ -6,11 +6,14 @@ public class HammL3 {
 
     private final HammL3Cell[] cells;
 
+    private final HammL3Stat stat;
+
     public HammL3() {
+        this.stat = new HammL3Stat();
         this.cells = new HammL3Cell[SPACE];
 
         for (int i = 0; i < SPACE; i++) {
-            this.cells[i] = new HammL3Cell(i);
+            this.cells[i] = new HammL3Cell(i, stat);
         }
     }
 
@@ -54,6 +57,18 @@ public class HammL3 {
         }
 
         return counter;
+    }
+
+    public int getStatCapacity() {
+        return this.stat.capacity.get();
+    }
+
+    public int getStatReallocs() {
+        return this.stat.reallocs.get();
+    }
+
+    public int getStatMoves() {
+        return this.stat.moves.get();
     }
 
     private static int getIndex(long value) {

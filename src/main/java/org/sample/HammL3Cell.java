@@ -26,9 +26,9 @@ public class HammL3Cell {
             20922789888000L
     };
 
-    private static final int CAPACITY_INIT_MIN = 1;
+    private static final int CAPACITY_INIT_MIN = 4;
 
-    private static final int CAPACITY_INIT_MAX = 8 * 1024;
+    private static final int CAPACITY_INIT_MAX = 64 * 1024;
 
     private static final double CAPACITY_DECIMATOR = 27435582641610000L / CAPACITY_INIT_MAX;
 
@@ -50,6 +50,8 @@ public class HammL3Cell {
 
     private final int bitCount4;
 
+    private final HammL3Stat stat;
+
     private long valuesPtr;
 
     private long payloadsPtr;
@@ -58,8 +60,9 @@ public class HammL3Cell {
 
     private int size;
 
-    public HammL3Cell(int index) {
+    public HammL3Cell(int index, HammL3Stat stat) {
         this.size = 0;
+        this.stat = stat;
 
         // Вычисляем секционные счетчики битов по индексу
         int i = index;
@@ -104,6 +107,9 @@ public class HammL3Cell {
         // Выделяем массивы - под хэши и полезную нагрузку
         this.valuesPtr = UNSAFE.allocateMemory(capacity * VALUE_SIZE);
         this.payloadsPtr = UNSAFE.allocateMemory(capacity * PAYLOAD_SIZE);
+
+        // Статистика
+        this.stat.capacity.addAndGet(capacity);
     }
 
     public synchronized void destroy() {
@@ -117,6 +123,11 @@ public class HammL3Cell {
     public synchronized void add(long value) {
         if (size == capacity) {
             int newCapacity = capacity * 2;
+
+            this.stat.capacity.addAndGet(+newCapacity);
+            this.stat.capacity.addAndGet(-capacity);
+            this.stat.reallocs.incrementAndGet();
+            this.stat.moves.addAndGet(+size);
 
             long newValuesPtr = UNSAFE.allocateMemory(newCapacity * VALUE_SIZE);
             long newPayloadsPtr = UNSAFE.allocateMemory(newCapacity * PAYLOAD_SIZE);
