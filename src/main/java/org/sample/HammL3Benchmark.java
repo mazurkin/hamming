@@ -19,10 +19,10 @@ import org.openjdk.jmh.annotations.Warmup;
 
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-@Timeout(time = 30, timeUnit = TimeUnit.SECONDS)
+@Timeout(time = 60, timeUnit = TimeUnit.SECONDS)
 @Threads(value = 8)
 @Warmup(iterations = 1, time = 10, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 2, time = 10, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 3, time = 10, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1, warmups = 1, jvmArgs = {"-Xms2048m", "-Xmx2048m", "-XX:MaxDirectMemorySize=512M"})
 public class HammL3Benchmark {
 

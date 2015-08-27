@@ -19,7 +19,7 @@ Hash values and payload values are stored in off-heap memory via sun.misc.Unsafe
 
 ```
 $ mvn clean install
-$ java -jar target/benchmarks.jar
+$ $JAVA_HOME/bin/java -jar target/benchmarks.jar -gc true
 ```
 
 # Becnhmark results
@@ -40,35 +40,35 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.51-b03, mixed mode)
 ## Thread count: 1
 
 ```
-Benchmark                  (count)  (distance)  Mode  Cnt   Score   Error  Units
-HammL3Benchmark.contains  50000000           0  avgt    2   ~10⁻⁴          ms/op
-HammL3Benchmark.contains  50000000           1  avgt    2   0.225          ms/op
-HammL3Benchmark.contains  50000000           2  avgt    2   0.439          ms/op
-HammL3Benchmark.contains  50000000           4  avgt    2   0.957          ms/op
-HammL3Benchmark.contains  50000000           8  avgt    2   1.688          ms/op
-HammL3Benchmark.contains  50000000          16  avgt    2   1.888          ms/op
-HammL3Benchmark.count     50000000           0  avgt    2   ~10⁻⁴          ms/op
-HammL3Benchmark.count     50000000           1  avgt    2   0.234          ms/op
-HammL3Benchmark.count     50000000           2  avgt    2   0.462          ms/op
-HammL3Benchmark.count     50000000           4  avgt    2   0.956          ms/op
-HammL3Benchmark.count     50000000           8  avgt    2   1.719          ms/op
-HammL3Benchmark.count     50000000          16  avgt    2   2.066          ms/op
+Benchmark                  (count)  (distance)  Mode  Cnt   Score    Error  Units
+HammL3Benchmark.contains  50000000           0  avgt    3  ≈ 10⁻⁴           ms/op
+HammL3Benchmark.contains  50000000           1  avgt    3   0.220 ±  0.118  ms/op
+HammL3Benchmark.contains  50000000           2  avgt    3   0.430 ±  0.077  ms/op
+HammL3Benchmark.contains  50000000           4  avgt    3   0.867 ±  0.076  ms/op
+HammL3Benchmark.contains  50000000           8  avgt    3   1.614 ±  0.632  ms/op
+HammL3Benchmark.contains  50000000          16  avgt    3   1.835 ±  0.109  ms/op
+HammL3Benchmark.count     50000000           0  avgt    3  ≈ 10⁻⁴           ms/op
+HammL3Benchmark.count     50000000           1  avgt    3   0.211 ±  0.020  ms/op
+HammL3Benchmark.count     50000000           2  avgt    3   0.426 ±  0.043  ms/op
+HammL3Benchmark.count     50000000           4  avgt    3   1.200 ±  4.458  ms/op
+HammL3Benchmark.count     50000000           8  avgt    3   1.764 ±  4.256  ms/op
+HammL3Benchmark.count     50000000          16  avgt    3   1.860 ±  0.077  ms/op
 ```
 
 ## Thread count: 8
 
 ```
-Benchmark                  (count)  (distance)  Mode  Cnt   Score   Error  Units
-HammL3Benchmark.contains  50000000           0  avgt    2   ~10⁻⁴          ms/op
-HammL3Benchmark.contains  50000000           1  avgt    2   0.567          ms/op
-HammL3Benchmark.contains  50000000           2  avgt    2   1.072          ms/op
-HammL3Benchmark.contains  50000000           4  avgt    2   2.127          ms/op
-HammL3Benchmark.contains  50000000           8  avgt    2   4.217          ms/op
-HammL3Benchmark.contains  50000000          16  avgt    2   5.896          ms/op
-HammL3Benchmark.count     50000000           0  avgt    2   ~10⁻⁴          ms/op
-HammL3Benchmark.count     50000000           1  avgt    2   0.488          ms/op
-HammL3Benchmark.count     50000000           2  avgt    2   0.970          ms/op
-HammL3Benchmark.count     50000000           4  avgt    2   2.098          ms/op
-HammL3Benchmark.count     50000000           8  avgt    2   6.286          ms/op
-HammL3Benchmark.count     50000000          16  avgt    2   8.739          ms/op
+Benchmark                  (count)  (distance)  Mode  Cnt   Score    Error  Units
+HammL3Benchmark.contains  50000000           0  avgt    3  ≈ 10⁻⁴           ms/op
+HammL3Benchmark.contains  50000000           1  avgt    3   0.579 ±  0.163  ms/op
+HammL3Benchmark.contains  50000000           2  avgt    3   1.132 ±  0.160  ms/op
+HammL3Benchmark.contains  50000000           4  avgt    3   2.216 ±  4.122  ms/op
+HammL3Benchmark.contains  50000000           8  avgt    3   5.273 ±  2.169  ms/op
+HammL3Benchmark.contains  50000000          16  avgt    3   7.642 ±  6.781  ms/op
+HammL3Benchmark.count     50000000           0  avgt    3  ≈ 10⁻⁴           ms/op
+HammL3Benchmark.count     50000000           1  avgt    3   0.504 ±  0.099  ms/op
+HammL3Benchmark.count     50000000           2  avgt    3   1.035 ±  1.118  ms/op
+HammL3Benchmark.count     50000000           4  avgt    3   3.680 ± 11.782  ms/op
+HammL3Benchmark.count     50000000           8  avgt    3   4.227 ±  8.633  ms/op
+HammL3Benchmark.count     50000000          16  avgt    3   8.541 ± 17.771  ms/op
 ```
