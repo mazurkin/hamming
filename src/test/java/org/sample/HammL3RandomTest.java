@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import junit.framework.Assert;
 
-public class HammL3Test {
+public class HammL3RandomTest {
 
     private static final int CAPACITY = 10000;
 

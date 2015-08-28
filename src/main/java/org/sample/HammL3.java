@@ -24,13 +24,13 @@ public class HammL3 {
     }
 
     public void add(long value) {
-        int index = getIndex(value);
+        int index = HammL3Util.getIndex(value);
 
         cells[index].add(value);
     }
 
     public void remove(long value) {
-        int index = getIndex(value);
+        int index = HammL3Util.getIndex(value);
 
         cells[index].remove(value);
     }
@@ -69,20 +69,6 @@ public class HammL3 {
 
     public int getStatMoves() {
         return this.stat.moves.get();
-    }
-
-    private static int getIndex(long value) {
-        int index = 0;
-
-        index += Integer.bitCount((int) value & 0xFFFF) /* 17^0 */ ;
-        value >>= 16;
-        index += Integer.bitCount((int) value & 0xFFFF) /* 17^1 */ * 17;
-        value >>= 16;
-        index += Integer.bitCount((int) value & 0xFFFF) /* 17^2 */ * 289;
-        value >>= 16;
-        index += Integer.bitCount((int) value & 0xFFFF) /* 17^3 */ * 4913;
-
-        return index;
     }
 
 }

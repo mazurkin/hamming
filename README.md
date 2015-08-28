@@ -44,12 +44,13 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.51-b03, mixed mode)
 ```
 milliseconds on 1000 operations
 
-Benchmark              (capacity)  (distance)  Mode  Cnt      Score      Error  Units
-HammL3Benchmark.count    10000000           0    ss    5      6.819 ±    5.567  ms/op
-HammL3Benchmark.count    10000000           2    ss    5    612.373 ±   20.931  ms/op
-HammL3Benchmark.count    10000000           4    ss    5   1954.719 ±   96.118  ms/op
-HammL3Benchmark.count    10000000           8    ss    5   7095.573 ± 1695.816  ms/op
-HammL3Benchmark.count    10000000          16    ss    5  12736.173 ±  317.221  ms/op
+Benchmark              (capacity)  (distance)  Mode  Cnt      Score     Error  Units
+HammL3Benchmark.count    10000000           0    ss    5      6.967 ±   4.554  ms/op
+HammL3Benchmark.count    10000000           2    ss    5    603.032 ±   8.864  ms/op
+HammL3Benchmark.count    10000000           4    ss    5   1913.529 ±  17.432  ms/op
+HammL3Benchmark.count    10000000           8    ss    5   6663.055 ±  49.871  ms/op
+HammL3Benchmark.count    10000000          16    ss    5  13120.210 ± 958.439  ms/op
+
 ```
 
 ## HammL3Benchmark: 8 threads

@@ -1,4 +1,4 @@
-package org.sample;
+package org.sample.benchmarks;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +22,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.sample.HammL3;
 
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -30,11 +31,11 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @Warmup(iterations = 3, batchSize = 1000)
 @Measurement(iterations = 5, batchSize = 1000)
 @Fork(value = 1, warmups = 0, jvmArgs = {"-Xms2048m", "-Xmx2048m", "-XX:MaxDirectMemorySize=512M"})
-public class PlainBenchmark {
+public class HammL3Benchmark {
 
     private static final long RANDOM_SEED = 1L;
 
-    @Param({"8"})
+    @Param({"0", "2", "4", "8", "16"})
     public int distance;
 
     @State(Scope.Benchmark)
@@ -43,22 +44,23 @@ public class PlainBenchmark {
         @Param({"10000000"})
         public int capacity;
 
-        public long[] values;
+        public HammL3 hamm;
 
         @Setup(Level.Trial)
         public void init() {
-            this.values = new long[capacity];
+            this.hamm = new HammL3();
 
             Random initRandom = new Random(RANDOM_SEED);
 
             for (int i = 0; i < capacity; i++) {
-                this.values[i] = initRandom.nextLong();
+                this.hamm.add(initRandom.nextLong());
             }
         }
 
         @TearDown(Level.Trial)
         public void destroy() {
-            this.values = null;
+            this.hamm.destroy();
+            this.hamm = null;
         }
     }
 
@@ -76,28 +78,13 @@ public class PlainBenchmark {
     @Benchmark
     @BenchmarkMode(Mode.SingleShotTime)
     public int count(BenchmarkState bs, ThreadState ts) {
-        long value = ts.random.nextLong();
-        long[] values = bs.values;
-        int size = bs.capacity;
-        int distance = this.distance;
-
-        int counter = 0;
-
-        for (int i = 0; i < size; i++) {
-            long xor = value ^ values[i];
-            int d = Long.bitCount(xor);
-            if (d <= distance) {
-                counter++;
-            }
-        }
-
-        return counter;
+        return bs.hamm.count(ts.random.nextLong(), distance);
     }
 
     public static void main(String[] args) throws RunnerException {
         // Простейшие настройки - для отладки из IDE
         Options opt = new OptionsBuilder()
-                .include(PlainBenchmark.class.getSimpleName())
+                .include(HammL3Benchmark.class.getSimpleName())
                 .forks(0)
                 .warmupIterations(0)
                 .measurementIterations(1)

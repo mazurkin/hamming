@@ -1,30 +1,8 @@
 package org.sample;
 
-import java.lang.reflect.Field;
-
 import sun.misc.Unsafe;
 
-public class HammL3Cell {
-
-    private static final double[] FACTORIALS = {
-            1L,
-            1L,
-            2L,
-            6L,
-            24L,
-            120L,
-            720L,
-            5040L,
-            40320L,
-            362880L,
-            3628800L,
-            39916800L,
-            479001600L,
-            6227020800L,
-            87178291200L,
-            1307674368000L,
-            20922789888000L
-    };
+final class HammL3Cell {
 
     private static final int CAPACITY_INIT_MIN = 4;
 
@@ -38,7 +16,7 @@ public class HammL3Cell {
 
     private static final int PAYLOAD_SIZE = 8;
 
-    private static final Unsafe UNSAFE = getUnsafe();
+    private static final Unsafe UNSAFE = HammL3Util.UNSAFE;
 
     private final int bitCount;
 
@@ -90,13 +68,13 @@ public class HammL3Cell {
         // массиве вычисленный реальный размер нужно поделить на делитель:
         //      DECIMATOR = 27435582641610000 / 16384 = 1674535073340
 
-        double realCapacity1 = FACTORIALS[16] / FACTORIALS[bitCount1] / FACTORIALS[16 - bitCount1];
-        double realCapacity2 = FACTORIALS[16] / FACTORIALS[bitCount2] / FACTORIALS[16 - bitCount2];
-        double realCapacity3 = FACTORIALS[16] / FACTORIALS[bitCount3] / FACTORIALS[16 - bitCount3];
-        double realCapacity4 = FACTORIALS[16] / FACTORIALS[bitCount4] / FACTORIALS[16 - bitCount4];
-
         // Смасштабированная емкость ячейки
-        double realCapacity = (realCapacity1 * realCapacity2 * realCapacity3 * realCapacity4) / CAPACITY_DECIMATOR;
+        double realCapacity =
+                HammL3Util.C4(bitCount1, 16)
+                * HammL3Util.C4(bitCount2, 16)
+                * HammL3Util.C4(bitCount3, 16)
+                * HammL3Util.C4(bitCount4, 16)
+                / CAPACITY_DECIMATOR;
 
         // Окончательно вычисляем емкость ячейки с учетом лимитов
         int capacity = (int) Math.round(realCapacity);
@@ -273,14 +251,4 @@ public class HammL3Cell {
         return true;
     }
 
-    @SuppressWarnings("restriction")
-    private static Unsafe getUnsafe() {
-        try {
-            Field singleoneInstanceField = Unsafe.class.getDeclaredField("theUnsafe");
-            singleoneInstanceField.setAccessible(true);
-            return (Unsafe) singleoneInstanceField.get(null);
-        } catch (Exception e) {
-            throw new IllegalStateException("Fail to get the Unsafe instance");
-        }
-    }
 }
