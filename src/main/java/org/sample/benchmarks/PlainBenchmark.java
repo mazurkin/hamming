@@ -27,7 +27,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Timeout(time = 60, timeUnit = TimeUnit.MINUTES)
 @Threads(value = 8)
-@Warmup(iterations = 3, batchSize = 1000)
+@Warmup(iterations = 2, batchSize = 1000)
 @Measurement(iterations = 5, batchSize = 1000)
 @Fork(value = 1, warmups = 0, jvmArgs = {"-Xms2048m", "-Xmx2048m", "-XX:MaxDirectMemorySize=512M"})
 public class PlainBenchmark {
