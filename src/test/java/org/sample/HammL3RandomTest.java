@@ -13,7 +13,7 @@ import junit.framework.Assert;
 
 public class HammL3RandomTest {
 
-    private static final int CAPACITY = 10000;
+    private static final int CAPACITY = 1000000;
 
     private static Set<Long> values;
 
@@ -77,7 +77,7 @@ public class HammL3RandomTest {
 
     @Test
     public void testCount() throws Exception {
-        int distance = 20;
+        int distance = 13;
 
         Iterator<Long> iterator = values.iterator();
         long value = iterator.next();
@@ -96,4 +96,5 @@ public class HammL3RandomTest {
 
         System.out.printf("Found %d with distance %d in %d items\n", found, distance, values.size());
     }
+
 }

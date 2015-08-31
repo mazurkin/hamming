@@ -42,44 +42,45 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.51-b03, mixed mode)
 ## HammL3Benchmark: 1 thread
 
 ```
-milliseconds on 1000 operations
+ms/op = milliseconds per 1000 micro-calls
 
-Benchmark              (capacity)  (distance)  Mode  Cnt      Score     Error  Units
-HammL3Benchmark.count    10000000           0    ss    5      6.967 ±   4.554  ms/op
-HammL3Benchmark.count    10000000           2    ss    5    603.032 ±   8.864  ms/op
-HammL3Benchmark.count    10000000           4    ss    5   1913.529 ±  17.432  ms/op
-HammL3Benchmark.count    10000000           8    ss    5   6663.055 ±  49.871  ms/op
-HammL3Benchmark.count    10000000          16    ss    5  13120.210 ± 958.439  ms/op
-
+Benchmark              (capacity)  (distance)  Mode  Cnt      Score      Error  Units
+HammL3Benchmark.count    10000000           0    ss    5      8.166 ±    5.018  ms/op
+HammL3Benchmark.count    10000000           2    ss    5    178.331 ±    6.518  ms/op
+HammL3Benchmark.count    10000000           4    ss    5   1134.726 ±  149.419  ms/op
+HammL3Benchmark.count    10000000           8    ss    5   7482.099 ± 2890.950  ms/op
+HammL3Benchmark.count    10000000          16    ss    5  18900.717 ± 3525.560  ms/op
 ```
 
 ## HammL3Benchmark: 8 threads
 
 ```
-milliseconds on 1000 operations
+ms/op = milliseconds per 1000 micro-calls
 
-Benchmark              (capacity)  (distance)  Mode  Cnt      Score      Error  Units
-HammL3Benchmark.count    10000000           0    ss    5     14.101 ±    5.275  ms/op
-HammL3Benchmark.count    10000000           2    ss    5   1657.247 ±  606.828  ms/op
-HammL3Benchmark.count    10000000           4    ss    5   8260.218 ± 1848.761  ms/op
-HammL3Benchmark.count    10000000           8    ss    5  29334.059 ± 1661.558  ms/op
-HammL3Benchmark.count    10000000          16    ss    5  48744.981 ± 9367.506  ms/op
+Benchmark              (capacity)  (distance)  Mode  Cnt      Score       Error  Units
+HammL3Benchmark.count    10000000           0    ss    5     13.525 ±     7.422  ms/op
+HammL3Benchmark.count    10000000           2    ss    5    624.531 ±    36.620  ms/op
+HammL3Benchmark.count    10000000           4    ss    5   4039.825 ±   349.892  ms/op
+HammL3Benchmark.count    10000000           8    ss    5  26622.942 ± 15663.154  ms/op
+HammL3Benchmark.count    10000000          16    ss    5  61455.721 ± 16375.911  ms/op
 ```
 
 ## PlainBenchmark: 1 thread
 
 ```
-milliseconds on 1000 operations
+ms/op = milliseconds per 1000 micro-calls
 
-Benchmark             (capacity)  (distance)  Mode  Cnt     Score      Error  Units
-PlainBenchmark.count    10000000           8    ss    5  8636.153 ± 1634.817  ms/op
+Benchmark             (capacity)  (distance)  Mode  Cnt      Score      Error  Units
+PlainBenchmark.count    10000000           1    ss    5  12690.818 ± 5523.519  ms/op
+PlainBenchmark.count    10000000           8    ss    5   9828.689 ± 2968.578  ms/op
 ```
 
 ## PlainBenchmark: 8 threads
 
 ```
-milliseconds on 1000 operations
+ms/op = milliseconds per 1000 micro-calls
 
 Benchmark             (capacity)  (distance)  Mode  Cnt      Score       Error  Units
-PlainBenchmark.count    10000000           8    ss    5  25297.028 ± 15146.301  ms/op
+PlainBenchmark.count    10000000           1    ss    5  37983.394 ± 19062.100  ms/op
+PlainBenchmark.count    10000000           8    ss    5  34428.467 ± 13859.389  ms/op
 ```

@@ -1,8 +1,5 @@
 package org.sample;
 
-import java.util.Random;
-import java.util.Set;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -11,16 +8,10 @@ import junit.framework.Assert;
 
 public class HammL3SimpleTest {
 
-    private static final int CAPACITY = 10000;
-
-    private static Set<Long> values;
-
     private static HammL3 hamm;
 
     @BeforeClass
     public static void setUp() throws Exception {
-        Random random = new Random(1);
-
         hamm = new HammL3();
         hamm.add(0x1000100010001333L);
     }

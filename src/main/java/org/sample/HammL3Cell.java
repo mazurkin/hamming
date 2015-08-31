@@ -8,9 +8,9 @@ final class HammL3Cell {
 
     private static final int CAPACITY_INIT_MAX = 64 * 1024;
 
-    private static final double CAPACITY_DECIMATOR = 27435582641610000L / CAPACITY_INIT_MAX;
+    private static final long CAPACITY_DECIMATOR = 27435582641610000L / CAPACITY_INIT_MAX;
 
-    private static final int CHECK_COUNTS_SIZE = 32;
+    private static final int CHECK_COUNTS_SIZE = 16;
 
     private static final int VALUE_SIZE = 8;
 
@@ -18,17 +18,9 @@ final class HammL3Cell {
 
     private static final Unsafe UNSAFE = HammL3Util.UNSAFE;
 
-    private final int bitCount;
-
-    private final int bitCount1;
-
-    private final int bitCount2;
-
-    private final int bitCount3;
-
-    private final int bitCount4;
-
     private final HammL3Stat stat;
+
+    private final int bitCount;
 
     private long valuesPtr;
 
@@ -36,7 +28,7 @@ final class HammL3Cell {
 
     private int capacity;
 
-    private int size;
+    private volatile int size;
 
     public HammL3Cell(int index, HammL3Stat stat) {
         this.size = 0;
@@ -44,15 +36,14 @@ final class HammL3Cell {
 
         // Вычисляем секционные счетчики битов по индексу
         int i = index;
-        this.bitCount1 = i % 17;
+        int bitCount1 = i % 17;
         i /= 17;
-        this.bitCount2 = i % 17;
+        int bitCount2 = i % 17;
         i /= 17;
-        this.bitCount3 = i % 17;
+        int bitCount3 = i % 17;
         i /= 17;
-        this.bitCount4 = i % 17;
+        int bitCount4 = i % 17;
 
-        // Суммарный счетчик битов
         this.bitCount = bitCount1 + bitCount2 + bitCount3 + bitCount4;
 
         // Число возможных вариантов long-числа теоретически попадающих под данный индекс рассчитывается как
@@ -68,16 +59,14 @@ final class HammL3Cell {
         // массиве вычисленный реальный размер нужно поделить на делитель:
         //      DECIMATOR = 27435582641610000 / 16384 = 1674535073340
 
-        // Смасштабированная емкость ячейки
-        double realCapacity =
+        // Окончательно вычисляем емкость ячейки с учетом лимитов
+        int capacity = (int) (
                 HammL3Util.C4(bitCount1, 16)
                 * HammL3Util.C4(bitCount2, 16)
                 * HammL3Util.C4(bitCount3, 16)
                 * HammL3Util.C4(bitCount4, 16)
-                / CAPACITY_DECIMATOR;
-
-        // Окончательно вычисляем емкость ячейки с учетом лимитов
-        int capacity = (int) Math.round(realCapacity);
+                / CAPACITY_DECIMATOR
+        );
         capacity = Math.max(CAPACITY_INIT_MIN, capacity);
         capacity = Math.min(CAPACITY_INIT_MAX, capacity);
         this.capacity = capacity;
@@ -161,14 +150,7 @@ final class HammL3Cell {
         }
     }
 
-    public synchronized boolean contains(HammL3Context context) {
-        if (!matches(context)) {
-            return false;
-        }
-
-        long value = context.value;
-        int distance = context.distance;
-
+    public synchronized boolean contains(long value, int distance) {
         long valuesRunner = this.valuesPtr;
         for (int i = 0; i < size; i++) {
             long xor = value ^ UNSAFE.getLong(valuesRunner);
@@ -185,13 +167,20 @@ final class HammL3Cell {
         return false;
     }
 
-    public synchronized int count(HammL3Context context) {
-        if (!matches(context)) {
-            return 0;
+    public synchronized boolean contains(long value) {
+        long valuesRunner = this.valuesPtr;
+        for (int i = 0; i < size; i++) {
+            if (value == UNSAFE.getLong(valuesRunner)) {
+                return true;
+            }
+
+            valuesRunner += VALUE_SIZE;
         }
 
-        long value = context.value;
-        int distance = context.distance;
+        return false;
+    }
+
+    public synchronized int count(long value, int distance) {
         int counter = 0;
 
         long valuesRunner = this.valuesPtr;
@@ -210,45 +199,20 @@ final class HammL3Cell {
         return counter;
     }
 
-    private boolean matches(HammL3Context context) {
-        // Всегда выполняем легкую проверку на соответствие общего количества бит. Если общее количество битов
-        // расходится то проверять этот массив нет смысла.
-        if (this.bitCount < context.bitCountMin || this.bitCount > context.bitCountMax) {
-            return false;
+    public synchronized int count(long value) {
+        long valuesRunner = this.valuesPtr;
+        for (int i = 0; i < size; i++) {
+            if (value == UNSAFE.getLong(valuesRunner)) {
+                return 1;
+            }
+
+            valuesRunner += VALUE_SIZE;
         }
 
-        // Для достаточно больших массивов проверяем соответствие посекционных счетчиков битов. При слишком большом
-        // суммарном расхождении посекционных счетчиков, которое превышает указанную в параметре метода дистанцию
-        // проверять этот массив нет смысла.
-        if (size > CHECK_COUNTS_SIZE) {
-            int leastPossibleDistance = 0;
-            if (context.bitCount1 > this.bitCount1) {
-                leastPossibleDistance += context.bitCount1 - this.bitCount1;
-            } else {
-                leastPossibleDistance += this.bitCount1 - context.bitCount1;
-            }
-            if (context.bitCount2 > this.bitCount2) {
-                leastPossibleDistance += context.bitCount2 - this.bitCount2;
-            } else {
-                leastPossibleDistance += this.bitCount2 - context.bitCount2;
-            }
-            if (context.bitCount3 > this.bitCount3) {
-                leastPossibleDistance += context.bitCount3 - this.bitCount3;
-            } else {
-                leastPossibleDistance += this.bitCount3 - context.bitCount3;
-            }
-            if (context.bitCount4 > this.bitCount4) {
-                leastPossibleDistance += context.bitCount4 - this.bitCount4;
-            } else {
-                leastPossibleDistance += this.bitCount4 - context.bitCount4;
-            }
-
-            if (leastPossibleDistance > context.distance) {
-                return false;
-            }
-        }
-
-        return true;
+        return 0;
     }
 
+    public int getBitCount() {
+        return bitCount;
+    }
 }

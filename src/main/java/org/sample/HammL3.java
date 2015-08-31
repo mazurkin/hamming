@@ -2,7 +2,7 @@ package org.sample;
 
 public class HammL3 {
 
-    private static final int SPACE = /* 17^4 */ 83521;
+    private static final int SPACE = 17 * 17 * 17 * 17;
 
     private final HammL3Cell[] cells;
 
@@ -36,11 +36,34 @@ public class HammL3 {
     }
 
     public boolean contains(long value, int distance) {
-        HammL3Context context = new HammL3Context(value, distance);
+        if (distance < 0 || distance > 16) {
+            throw new IllegalArgumentException("Distance is illegal");
+        }
 
-        for (int i = context.indexMin; i <= context.indexMax; i++) {
-            if (cells[i].contains(context)) {
-                return true;
+        int index = HammL3Util.getIndex(value);
+
+        if (cells[index].contains(value)) {
+            return true;
+        }
+
+        if (distance > 0) {
+            int bitCount = Long.bitCount(value);
+            int bitCountMin = Math.max(bitCount - distance, 0);
+            int bitCountMax = Math.min(bitCount + distance, 64);
+
+            int[] offsets = HammL3Mutators.INSTANCE.getMutators(distance);
+
+            for (int offset : offsets) {
+                int cellIndex = index + offset;
+                if (0 <= cellIndex && cellIndex < SPACE) {
+                    HammL3Cell cell = cells[cellIndex];
+                    int cellBitCount = cell.getBitCount();
+                    if (bitCountMin <= cellBitCount && cellBitCount <= bitCountMax) {
+                        if (cell.contains(value, distance)) {
+                            return true;
+                        }
+                    }
+                }
             }
         }
 
@@ -48,12 +71,32 @@ public class HammL3 {
     }
 
     public int count(long value, int distance) {
-        HammL3Context context = new HammL3Context(value, distance);
+        if (distance < 0 || distance > 16) {
+            throw new IllegalArgumentException("Distance is illegal");
+        }
 
         int counter = 0;
 
-        for (int i = context.indexMin; i <= context.indexMax; i++) {
-            counter += cells[i].count(context);
+        int index = HammL3Util.getIndex(value);
+        counter += cells[index].count(value);
+
+        if (distance > 0) {
+            int bitCount = Long.bitCount(value);
+            int bitCountMin = Math.max(bitCount - distance, 0);
+            int bitCountMax = Math.min(bitCount + distance, 64);
+
+            int[] offsets = HammL3Mutators.INSTANCE.getMutators(distance);
+
+            for (int offset : offsets) {
+                int cellIndex = index + offset;
+                if (0 <= cellIndex && cellIndex < SPACE) {
+                    HammL3Cell cell = cells[cellIndex];
+                    int cellBitCount = cell.getBitCount();
+                    if (bitCountMin <= cellBitCount && cellBitCount <= bitCountMax) {
+                        counter += cell.count(value, distance);
+                    }
+                }
+            }
         }
 
         return counter;

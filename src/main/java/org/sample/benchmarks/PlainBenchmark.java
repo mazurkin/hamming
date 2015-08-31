@@ -26,15 +26,15 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Timeout(time = 60, timeUnit = TimeUnit.MINUTES)
-@Threads(value = 8)
-@Warmup(iterations = 3, batchSize = 1000)
+@Threads(value = 1)
+@Warmup(iterations = 2, batchSize = 1000)
 @Measurement(iterations = 5, batchSize = 1000)
 @Fork(value = 1, warmups = 0, jvmArgs = {"-Xms2048m", "-Xmx2048m", "-XX:MaxDirectMemorySize=512M"})
 public class PlainBenchmark {
 
     private static final long RANDOM_SEED = 1L;
 
-    @Param({"8"})
+    @Param({"1", "8"})
     public int distance;
 
     @State(Scope.Benchmark)
@@ -77,8 +77,10 @@ public class PlainBenchmark {
     @BenchmarkMode(Mode.SingleShotTime)
     public int count(BenchmarkState bs, ThreadState ts) {
         long value = ts.random.nextLong();
+
         long[] values = bs.values;
         int size = bs.capacity;
+
         int distance = this.distance;
 
         int counter = 0;
