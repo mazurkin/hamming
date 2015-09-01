@@ -10,8 +10,6 @@ final class HammL3Cell {
 
     private static final long CAPACITY_DECIMATOR = 27435582641610000L / CAPACITY_INIT_MAX;
 
-    private static final int CHECK_COUNTS_SIZE = 16;
-
     private static final int VALUE_SIZE = 8;
 
     private static final int PAYLOAD_SIZE = 8;
