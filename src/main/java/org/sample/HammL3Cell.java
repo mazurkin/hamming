@@ -20,8 +20,6 @@ final class HammL3Cell {
 
     private final HammL3Stat stat;
 
-    private final int bitCount;
-
     private long valuesPtr;
 
     private long payloadsPtr;
@@ -36,22 +34,20 @@ final class HammL3Cell {
 
         // Вычисляем секционные счетчики битов по индексу
         int i = index;
+        int bitCount0 = i % 17;
+        i /= 17;
         int bitCount1 = i % 17;
         i /= 17;
         int bitCount2 = i % 17;
         i /= 17;
         int bitCount3 = i % 17;
-        i /= 17;
-        int bitCount4 = i % 17;
-
-        this.bitCount = bitCount1 + bitCount2 + bitCount3 + bitCount4;
 
         // Число возможных вариантов long-числа теоретически попадающих под данный индекс рассчитывается как
         //
-        // Q(index) = C(bitCount1,16) * C(bitCount2,16) * C(bitCount3,16) * C(bitCount4,16)
+        // Q(index) = C(bitCount0,16) * C(bitCount1,16) * C(bitCount2,16) * C(bitCount3,16)
         // где С(k,n) = n! / k! / (n-k)!
         //
-        // где максимальный вариант при bitCount1=bitCount2=bitCount3=bitCount4=8 будет равен
+        // где максимальный вариант при bitCount0=bitCount1=bitCount2=bitCount3=8 будет равен
         // Q(8888@x17) = Q(41760@x10) = 12870 ^ 4 = 27435582641610000
         //
         // Поскольку принять вообще все теоретически возможные варианты у нас нет ни цели ни возможности нам
@@ -61,10 +57,10 @@ final class HammL3Cell {
 
         // Окончательно вычисляем емкость ячейки с учетом лимитов
         int capacity = (int) (
-                HammL3Util.C4(bitCount1, 16)
+                HammL3Util.C4(bitCount0, 16)
+                * HammL3Util.C4(bitCount1, 16)
                 * HammL3Util.C4(bitCount2, 16)
                 * HammL3Util.C4(bitCount3, 16)
-                * HammL3Util.C4(bitCount4, 16)
                 / CAPACITY_DECIMATOR
         );
         capacity = Math.max(CAPACITY_INIT_MIN, capacity);
@@ -212,7 +208,4 @@ final class HammL3Cell {
         return 0;
     }
 
-    public int getBitCount() {
-        return bitCount;
-    }
 }

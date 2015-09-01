@@ -47,22 +47,41 @@ public class HammL3 {
         }
 
         if (distance > 0) {
-            int bitCount = Long.bitCount(value);
-            int bitCountMin = Math.max(bitCount - distance, 0);
-            int bitCountMax = Math.min(bitCount + distance, 64);
+            int[] offsets = HammL3Mutators.INSTANCE.getOffsets(distance);
+            int[][] counts = HammL3Mutators.INSTANCE.getCounts(distance);
 
-            int[] offsets = HammL3Mutators.INSTANCE.getMutators(distance);
+            long v = value;
+            int bcM0 = - Long.bitCount(v & 0xFF);
+            int bcP0 = 16 + bcM0;
+            v >>= 16;
+            int bcM1 = - Long.bitCount(v & 0xFF);
+            int bcP1 = 16 + bcM1;
+            v >>= 16;
+            int bcM2 = - Long.bitCount(v & 0xFF);
+            int bcP2 = 16 + bcM2;
+            v >>= 16;
+            int bcM3 = - Long.bitCount(v & 0xFF);
+            int bcP3 = 16 + bcM3;
 
-            for (int offset : offsets) {
-                int cellIndex = index + offset;
-                if (0 <= cellIndex && cellIndex < SPACE) {
-                    HammL3Cell cell = cells[cellIndex];
-                    int cellBitCount = cell.getBitCount();
-                    if (bitCountMin <= cellBitCount && cellBitCount <= bitCountMax) {
-                        if (cell.contains(value, distance)) {
-                            return true;
-                        }
-                    }
+            for (int i = 0; i < offsets.length; i++) {
+                int[] sections = counts[i];
+
+                if (sections[0] < bcM0 || bcP0 < sections[0]) {
+                    continue;
+                }
+                if (sections[1] < bcM1 || bcP1 < sections[1]) {
+                    continue;
+                }
+                if (sections[2] < bcM2 || bcP2 < sections[2]) {
+                    continue;
+                }
+                if (sections[3] < bcM3 || bcP3 < sections[3]) {
+                    continue;
+                }
+
+                int cellIndex = index + offsets[i];
+                if (cells[cellIndex].contains(value, distance)) {
+                    return true;
                 }
             }
         }
@@ -81,21 +100,40 @@ public class HammL3 {
         counter += cells[index].count(value);
 
         if (distance > 0) {
-            int bitCount = Long.bitCount(value);
-            int bitCountMin = Math.max(bitCount - distance, 0);
-            int bitCountMax = Math.min(bitCount + distance, 64);
+            int[] offsets = HammL3Mutators.INSTANCE.getOffsets(distance);
+            int[][] counts = HammL3Mutators.INSTANCE.getCounts(distance);
 
-            int[] offsets = HammL3Mutators.INSTANCE.getMutators(distance);
+            long v = value;
+            int bcM0 = - Long.bitCount(v & 0xFFFF);
+            int bcP0 = 16 + bcM0;
+            v >>= 16;
+            int bcM1 = - Long.bitCount(v & 0xFFFF);
+            int bcP1 = 16 + bcM1;
+            v >>= 16;
+            int bcM2 = - Long.bitCount(v & 0xFFFF);
+            int bcP2 = 16 + bcM2;
+            v >>= 16;
+            int bcM3 = - Long.bitCount(v & 0xFFFF);
+            int bcP3 = 16 + bcM3;
 
-            for (int offset : offsets) {
-                int cellIndex = index + offset;
-                if (0 <= cellIndex && cellIndex < SPACE) {
-                    HammL3Cell cell = cells[cellIndex];
-                    int cellBitCount = cell.getBitCount();
-                    if (bitCountMin <= cellBitCount && cellBitCount <= bitCountMax) {
-                        counter += cell.count(value, distance);
-                    }
+            for (int i = 0; i < offsets.length; i++) {
+                int[] sections = counts[i];
+
+                if (sections[0] < bcM0 || bcP0 < sections[0]) {
+                    continue;
                 }
+                if (sections[1] < bcM1 || bcP1 < sections[1]) {
+                    continue;
+                }
+                if (sections[2] < bcM2 || bcP2 < sections[2]) {
+                    continue;
+                }
+                if (sections[3] < bcM3 || bcP3 < sections[3]) {
+                    continue;
+                }
+
+                int cellIndex = index + offsets[i];
+                counter += cells[cellIndex].count(value, distance);
             }
         }
 
