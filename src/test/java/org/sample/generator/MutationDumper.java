@@ -1,10 +1,11 @@
 package org.sample.generator;
 
+import java.io.DataOutputStream;
 import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 public class MutationDumper {
 
@@ -19,18 +20,18 @@ public class MutationDumper {
             countBuckets.add(new ArrayList<byte[]>(SPACE));
         }
 
-        for (int bc4 = -16; bc4 <= 16; bc4++) {
-            for (int bc3 = -16; bc3 <= 16; bc3++) {
-                for (int bc2 = -16; bc2 <= 16; bc2++) {
-                    for (int bc1 = -16; bc1 <= 16; bc1++) {
-                        int bc = Math.abs(bc1) + Math.abs(bc2) + Math.abs(bc3) + Math.abs(bc4);
+        for (int bc3 = -16; bc3 <= 16; bc3++) {
+            for (int bc2 = -16; bc2 <= 16; bc2++) {
+                for (int bc1 = -16; bc1 <= 16; bc1++) {
+                    for (int bc0 = -16; bc0 <= 16; bc0++) {
+                        int bc = Math.abs(bc0) + Math.abs(bc1) + Math.abs(bc2) + Math.abs(bc3);
                         if (bc <= 16) {
-                            int offset = bc1 + bc2 * 17 + bc3 * 17 * 17 + bc4 * 17 * 17 * 17;
+                            int offset = bc0 + bc1 * 17 + bc2 * 17 * 17 + bc3 * 17 * 17 * 17;
                             if (-SPACE < offset && offset < +SPACE && offset != 0) {
                                 for (int i = bc; i <= 16; i++) {
                                     offsetBuckets.get(i).add(offset);
 
-                                    byte[] sections = { (byte) bc1, (byte) bc2, (byte) bc3, (byte) bc4 } ;
+                                    byte[] sections = { (byte) bc0, (byte) bc1, (byte) bc2, (byte) bc3 } ;
                                     countBuckets.get(i).add(sections);
                                 }
                             }
@@ -40,29 +41,31 @@ public class MutationDumper {
             }
         }
 
-        OutputStream os = new FileOutputStream("mutators.dat");
-        ObjectOutputStream obs = new ObjectOutputStream(os);
+        OutputStream os = new FileOutputStream("mutators.dat.gz");
+        GZIPOutputStream gzos = new GZIPOutputStream(os, 1048510);
+        DataOutputStream dos = new DataOutputStream(gzos);
 
         for (int i = 0; i <= 16; i++) {
             List<Integer> offsets = offsetBuckets.get(i);
             List<byte[]> counts = countBuckets.get(i);
 
-            System.out.printf("Bucket %d - length %d\n", i, offsets.size());
+            System.out.printf("Distance %d - %d mutators\n", i, offsets.size());
 
-            obs.writeInt(offsets.size());
+            dos.writeInt(offsets.size());
             for (int j = 0; j < offsets.size(); j++) {
                 byte[] sections = counts.get(j);
-                obs.writeByte(sections[0]);
-                obs.writeByte(sections[1]);
-                obs.writeByte(sections[2]);
-                obs.writeByte(sections[3]);
+                dos.writeByte(sections[0]);
+                dos.writeByte(sections[1]);
+                dos.writeByte(sections[2]);
+                dos.writeByte(sections[3]);
 
                 int offset = offsets.get(j);
-                obs.writeInt(offset);
+                dos.writeInt(offset);
             }
         }
 
-        obs.close();
+        dos.close();
+        gzos.close();
         os.close();
     }
 }

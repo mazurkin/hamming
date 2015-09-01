@@ -1,14 +1,15 @@
 package org.sample;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
+import java.util.zip.GZIPInputStream;
 
 final class HammL3Mutators {
 
     public static final HammL3Mutators INSTANCE = new HammL3Mutators();
 
-    private static final String RESOURCE = "/mutators.dat";
+    private static final String RESOURCE = "/mutators.dat.gz";
 
     private final int[][] offsets;
     private final int[][][] counts;
@@ -20,37 +21,42 @@ final class HammL3Mutators {
         try {
             loadResource();
         } catch (IOException e) {
-            throw new IllegalStateException("Fail to load mutator resource file");
+            throw new IllegalStateException("Fail to load mutator resource file", e);
         }
     }
 
     private void loadResource() throws IOException {
         InputStream is = HammL3Mutators.class.getResourceAsStream(RESOURCE);
         try {
-            ObjectInputStream ois = new ObjectInputStream(is);
+            GZIPInputStream gzis = new GZIPInputStream(is);
             try {
-                for (int i = 0; i <= 16; i++) {
-                    int count = ois.readInt();
+                DataInputStream dis = new DataInputStream(gzis);
+                try {
+                    for (int i = 0; i <= 16; i++) {
+                        int count = dis.readInt();
 
-                    int[] offsets = new int[count];
-                    int[][] counts = new int[count][];
+                        int[] offsets = new int[count];
+                        int[][] counts = new int[count][];
 
-                    for (int j = 0; j < count; j++) {
-                        int[] sections = new int[4];
-                        sections[0] = ois.readByte();
-                        sections[1] = ois.readByte();
-                        sections[2] = ois.readByte();
-                        sections[3] = ois.readByte();
-                        counts[j] = sections;
+                        for (int j = 0; j < count; j++) {
+                            int[] sections = new int[4];
+                            sections[0] = dis.readByte();
+                            sections[1] = dis.readByte();
+                            sections[2] = dis.readByte();
+                            sections[3] = dis.readByte();
+                            counts[j] = sections;
 
-                        offsets[j] = ois.readInt();
+                            offsets[j] = dis.readInt();
+                        }
+
+                        this.offsets[i] = offsets;
+                        this.counts[i] = counts;
                     }
-
-                    this.offsets[i] = offsets;
-                    this.counts[i] = counts;
+                } finally {
+                    dis.close();
                 }
             } finally {
-                ois.close();
+                gzis.close();
             }
         } finally {
             is.close();
