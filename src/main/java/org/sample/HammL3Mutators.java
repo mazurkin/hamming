@@ -11,12 +11,10 @@ final class HammL3Mutators {
 
     private static final String RESOURCE = "/mutators.dat.gz";
 
-    private final int[][] offsets;
-    private final int[][][] counts;
+    private final HammL3Mutator[][] distanceMutators;
 
     private HammL3Mutators() {
-        this.offsets = new int[17][];
-        this.counts = new int[17][][];
+        this.distanceMutators = new HammL3Mutator[17][];
 
         try {
             loadResource();
@@ -35,22 +33,21 @@ final class HammL3Mutators {
                     for (int i = 0; i <= 16; i++) {
                         int count = dis.readInt();
 
-                        int[] offsets = new int[count];
-                        int[][] counts = new int[count][];
+                        HammL3Mutator[] mutators = new HammL3Mutator[count];
 
                         for (int j = 0; j < count; j++) {
-                            int[] sections = new int[4];
-                            sections[0] = dis.readByte();
-                            sections[1] = dis.readByte();
-                            sections[2] = dis.readByte();
-                            sections[3] = dis.readByte();
-                            counts[j] = sections;
+                            HammL3Mutator mutator = new HammL3Mutator();
 
-                            offsets[j] = dis.readInt();
+                            mutator.bc0 = dis.readByte();
+                            mutator.bc1 = dis.readByte();
+                            mutator.bc2 = dis.readByte();
+                            mutator.bc3 = dis.readByte();
+                            mutator.offset = dis.readInt();
+
+                            mutators[j] = mutator;
                         }
 
-                        this.offsets[i] = offsets;
-                        this.counts[i] = counts;
+                        this.distanceMutators[i] = mutators;
                     }
                 } finally {
                     dis.close();
@@ -63,11 +60,7 @@ final class HammL3Mutators {
         }
     }
 
-    public int[] getOffsets(int distance) {
-        return this.offsets[distance];
-    }
-
-    public int[][] getCounts(int distance) {
-        return this.counts[distance];
+    public HammL3Mutator[] getMutators(int distance) {
+        return this.distanceMutators[distance];
     }
 }

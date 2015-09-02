@@ -47,39 +47,36 @@ public class HammL3 {
         }
 
         if (distance > 0) {
-            int[] offsets = HammL3Mutators.INSTANCE.getOffsets(distance);
-            int[][] counts = HammL3Mutators.INSTANCE.getCounts(distance);
+            HammL3Mutator[] mutators = HammL3Mutators.INSTANCE.getMutators(distance);
 
             long v = value;
-            int bcM0 = - Long.bitCount(v & 0xFF);
-            int bcP0 = 16 + bcM0;
+            byte bcM0 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP0 = (byte) (16 + bcM0);
             v >>= 16;
-            int bcM1 = - Long.bitCount(v & 0xFF);
-            int bcP1 = 16 + bcM1;
+            byte bcM1 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP1 = (byte) (16 + bcM1);
             v >>= 16;
-            int bcM2 = - Long.bitCount(v & 0xFF);
-            int bcP2 = 16 + bcM2;
+            byte bcM2 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP2 = (byte) (16 + bcM2);
             v >>= 16;
-            int bcM3 = - Long.bitCount(v & 0xFF);
-            int bcP3 = 16 + bcM3;
+            byte bcM3 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP3 = (byte) (16 + bcM3);
 
-            for (int i = 0; i < offsets.length; i++) {
-                int[] sections = counts[i];
-
-                if (sections[0] < bcM0 || bcP0 < sections[0]) {
+            for (HammL3Mutator mutator : mutators) {
+                if (mutator.bc0 < bcM0 || bcP0 < mutator.bc0) {
                     continue;
                 }
-                if (sections[1] < bcM1 || bcP1 < sections[1]) {
+                if (mutator.bc1 < bcM1 || bcP1 < mutator.bc1) {
                     continue;
                 }
-                if (sections[2] < bcM2 || bcP2 < sections[2]) {
+                if (mutator.bc2 < bcM2 || bcP2 < mutator.bc2) {
                     continue;
                 }
-                if (sections[3] < bcM3 || bcP3 < sections[3]) {
+                if (mutator.bc3 < bcM3 || bcP3 < mutator.bc3) {
                     continue;
                 }
 
-                int cellIndex = index + offsets[i];
+                int cellIndex = index + mutator.offset;
                 if (cells[cellIndex].contains(value, distance)) {
                     return true;
                 }
@@ -100,39 +97,36 @@ public class HammL3 {
         counter += cells[index].count(value);
 
         if (distance > 0) {
-            int[] offsets = HammL3Mutators.INSTANCE.getOffsets(distance);
-            int[][] counts = HammL3Mutators.INSTANCE.getCounts(distance);
+            HammL3Mutator[] mutators = HammL3Mutators.INSTANCE.getMutators(distance);
 
             long v = value;
-            int bcM0 = - Long.bitCount(v & 0xFFFF);
-            int bcP0 = 16 + bcM0;
+            byte bcM0 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP0 = (byte) (16 + bcM0);
             v >>= 16;
-            int bcM1 = - Long.bitCount(v & 0xFFFF);
-            int bcP1 = 16 + bcM1;
+            byte bcM1 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP1 = (byte) (16 + bcM1);
             v >>= 16;
-            int bcM2 = - Long.bitCount(v & 0xFFFF);
-            int bcP2 = 16 + bcM2;
+            byte bcM2 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP2 = (byte) (16 + bcM2);
             v >>= 16;
-            int bcM3 = - Long.bitCount(v & 0xFFFF);
-            int bcP3 = 16 + bcM3;
+            byte bcM3 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP3 = (byte) (16 + bcM3);
 
-            for (int i = 0; i < offsets.length; i++) {
-                int[] sections = counts[i];
-
-                if (sections[0] < bcM0 || bcP0 < sections[0]) {
+            for (HammL3Mutator mutator : mutators) {
+                if (mutator.bc0 < bcM0 || bcP0 < mutator.bc0) {
                     continue;
                 }
-                if (sections[1] < bcM1 || bcP1 < sections[1]) {
+                if (mutator.bc1 < bcM1 || bcP1 < mutator.bc1) {
                     continue;
                 }
-                if (sections[2] < bcM2 || bcP2 < sections[2]) {
+                if (mutator.bc2 < bcM2 || bcP2 < mutator.bc2) {
                     continue;
                 }
-                if (sections[3] < bcM3 || bcP3 < sections[3]) {
+                if (mutator.bc3 < bcM3 || bcP3 < mutator.bc3) {
                     continue;
                 }
 
-                int cellIndex = index + offsets[i];
+                int cellIndex = index + mutator.offset;
                 counter += cells[cellIndex].count(value, distance);
             }
         }
