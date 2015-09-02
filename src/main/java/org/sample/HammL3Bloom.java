@@ -8,7 +8,7 @@ final class HammL3Bloom {
 
     private static final int SIZE_INITIAL = 256;
 
-    private static final int SIZE_RATIO = 8;
+    private static final int SIZE_RATIO = 6;
 
     private static final byte[] BIT_MASKS = {
             (byte) 0x01, (byte) 0x02, (byte) 0x04, (byte) 0x08,
@@ -74,13 +74,13 @@ final class HammL3Bloom {
             mix ^= mix >> 15;
             mix ^= mix << 33;
 
-            int index = (int) (mix & indexMask);
-            int bit = (int) ((mix & 0x0000070000000000L) >> 40);
+            int index1 = (int) ((mix >> 5) & indexMask);
+            int bit1 = (int) ((mix & 0x0000070000000000L) >> 40);
+            setBit(index1, bit1);
 
-            long offset = this.dataPtr + index;
-            byte b = UNSAFE.getByte(offset);
-            b |= BIT_MASKS[bit];
-            UNSAFE.putByte(offset, b);
+            int index2 = (int) ((mix >> 1) & indexMask);
+            int bit2 = (int) ((mix & 0x0000000700000000L) >> 32);
+            setBit(index2, bit2);
         }
 
         size++;
@@ -92,15 +92,29 @@ final class HammL3Bloom {
             mix ^= mix >> 15;
             mix ^= mix << 33;
 
-            int index = (int) (mix & indexMask);
-            int bit = (int) ((mix & 0x0000070000000000L) >> 40);
+            int index1 = (int) ((mix >> 5) & indexMask);
+            int bit1 = (int) ((mix & 0x0000070000000000L) >> 40);
 
-            long offset = this.dataPtr + index;
-            byte b = UNSAFE.getByte(offset);
-            return (b & BIT_MASKS[bit]) != 0;
+            int index2 = (int) ((mix >> 1) & indexMask);
+            int bit2 = (int) ((mix & 0x0000000700000000L) >> 32);
+
+            return checkBit(index1, bit1) && checkBit(index2, bit2);
         } else {
             return true;
         }
+    }
+
+    private void setBit(int index, int bit) {
+        long offset = this.dataPtr + index;
+        byte b = UNSAFE.getByte(offset);
+        b |= BIT_MASKS[bit];
+        UNSAFE.putByte(offset, b);
+    }
+
+    private boolean checkBit(int index, int bit) {
+        long offset = this.dataPtr + index;
+        byte b = UNSAFE.getByte(offset);
+        return (b & BIT_MASKS[bit]) != 0;
     }
 
     public boolean isOverloaded() {
