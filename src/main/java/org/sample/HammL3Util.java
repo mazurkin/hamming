@@ -8,7 +8,7 @@ final class HammL3Util {
 
     public static final Unsafe UNSAFE = getUnsafe();
 
-    public static final double[] FACTORIALS = {
+    public static final long[] FACTORIALS = {
             1L,
             1L,
             2L,
@@ -31,7 +31,7 @@ final class HammL3Util {
     private HammL3Util() {
     }
 
-    public static double C4(int k, int n) {
+    public static long C4(int k, int n) {
         return FACTORIALS[n] / FACTORIALS[k] / FACTORIALS[n - k];
     }
 

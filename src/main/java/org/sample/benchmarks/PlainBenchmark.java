@@ -34,7 +34,7 @@ public class PlainBenchmark {
 
     private static final long RANDOM_SEED = 1L;
 
-    @Param({"8"})
+    @Param({"1", "8"})
     public int distance;
 
     @State(Scope.Benchmark)
@@ -77,8 +77,10 @@ public class PlainBenchmark {
     @BenchmarkMode(Mode.SingleShotTime)
     public int count(BenchmarkState bs, ThreadState ts) {
         long value = ts.random.nextLong();
+
         long[] values = bs.values;
         int size = bs.capacity;
+
         int distance = this.distance;
 
         int counter = 0;

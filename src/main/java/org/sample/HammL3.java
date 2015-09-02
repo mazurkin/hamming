@@ -2,7 +2,7 @@ package org.sample;
 
 public class HammL3 {
 
-    private static final int SPACE = /* 17^4 */ 83521;
+    private static final int SPACE = 17 * 17 * 17 * 17;
 
     private final HammL3Cell[] cells;
 
@@ -36,11 +36,50 @@ public class HammL3 {
     }
 
     public boolean contains(long value, int distance) {
-        HammL3Context context = new HammL3Context(value, distance);
+        if (distance < 0 || distance > 16) {
+            throw new IllegalArgumentException("Distance is illegal");
+        }
 
-        for (int i = context.indexMin; i <= context.indexMax; i++) {
-            if (cells[i].contains(context)) {
-                return true;
+        int index = HammL3Util.getIndex(value);
+
+        if (cells[index].contains(value)) {
+            return true;
+        }
+
+        if (distance > 0) {
+            HammL3Mutator[] mutators = HammL3Mutators.INSTANCE.getMutators(distance);
+
+            long v = value;
+            byte bcM0 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP0 = (byte) (16 + bcM0);
+            v >>= 16;
+            byte bcM1 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP1 = (byte) (16 + bcM1);
+            v >>= 16;
+            byte bcM2 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP2 = (byte) (16 + bcM2);
+            v >>= 16;
+            byte bcM3 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP3 = (byte) (16 + bcM3);
+
+            for (HammL3Mutator mutator : mutators) {
+                if (mutator.bc0 < bcM0 || bcP0 < mutator.bc0) {
+                    continue;
+                }
+                if (mutator.bc1 < bcM1 || bcP1 < mutator.bc1) {
+                    continue;
+                }
+                if (mutator.bc2 < bcM2 || bcP2 < mutator.bc2) {
+                    continue;
+                }
+                if (mutator.bc3 < bcM3 || bcP3 < mutator.bc3) {
+                    continue;
+                }
+
+                int cellIndex = index + mutator.offset;
+                if (cells[cellIndex].contains(value, distance)) {
+                    return true;
+                }
             }
         }
 
@@ -48,12 +87,48 @@ public class HammL3 {
     }
 
     public int count(long value, int distance) {
-        HammL3Context context = new HammL3Context(value, distance);
+        if (distance < 0 || distance > 16) {
+            throw new IllegalArgumentException("Distance is illegal");
+        }
 
         int counter = 0;
 
-        for (int i = context.indexMin; i <= context.indexMax; i++) {
-            counter += cells[i].count(context);
+        int index = HammL3Util.getIndex(value);
+        counter += cells[index].count(value);
+
+        if (distance > 0) {
+            HammL3Mutator[] mutators = HammL3Mutators.INSTANCE.getMutators(distance);
+
+            long v = value;
+            byte bcM0 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP0 = (byte) (16 + bcM0);
+            v >>= 16;
+            byte bcM1 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP1 = (byte) (16 + bcM1);
+            v >>= 16;
+            byte bcM2 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP2 = (byte) (16 + bcM2);
+            v >>= 16;
+            byte bcM3 = (byte) -Long.bitCount(v & 0x000000000000FFFF);
+            byte bcP3 = (byte) (16 + bcM3);
+
+            for (HammL3Mutator mutator : mutators) {
+                if (mutator.bc0 < bcM0 || bcP0 < mutator.bc0) {
+                    continue;
+                }
+                if (mutator.bc1 < bcM1 || bcP1 < mutator.bc1) {
+                    continue;
+                }
+                if (mutator.bc2 < bcM2 || bcP2 < mutator.bc2) {
+                    continue;
+                }
+                if (mutator.bc3 < bcM3 || bcP3 < mutator.bc3) {
+                    continue;
+                }
+
+                int cellIndex = index + mutator.offset;
+                counter += cells[cellIndex].count(value, distance);
+            }
         }
 
         return counter;
