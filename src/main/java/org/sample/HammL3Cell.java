@@ -16,7 +16,9 @@ final class HammL3Cell {
 
     private static final Unsafe UNSAFE = HammL3Util.UNSAFE;
 
-    private final HammL3Stat stat;
+    private HammL3Stat stat;
+
+    private HammL3Bloom bloom;
 
     private long valuesPtr;
 
@@ -71,6 +73,9 @@ final class HammL3Cell {
 
         // Статистика
         this.stat.capacity.addAndGet(capacity);
+
+        // Фильтр Блума
+        this.bloom = new HammL3Bloom();
     }
 
     public synchronized void destroy() {
@@ -79,6 +84,8 @@ final class HammL3Cell {
 
         this.valuesPtr = 0;
         this.payloadsPtr = 0;
+
+        this.bloom.destroy();
     }
 
     public synchronized void add(long value) {
@@ -105,19 +112,27 @@ final class HammL3Cell {
             this.capacity = newCapacity;
         }
 
-        long valuesRunner = this.valuesPtr;
-        for (int i = 0; i < size; i++) {
-            if (UNSAFE.getLong(valuesRunner) == value) {
-                return;
-            }
+        if (bloom.contains(value)) {
+            long valuesRunner = this.valuesPtr;
+            for (int i = 0; i < size; i++) {
+                if (UNSAFE.getLong(valuesRunner) == value) {
+                    return;
+                }
 
-            valuesRunner += VALUE_SIZE;
+                valuesRunner += VALUE_SIZE;
+            }
         }
 
         UNSAFE.putLong(this.valuesPtr + size * VALUE_SIZE, value);
         UNSAFE.putLong(this.payloadsPtr + size * PAYLOAD_SIZE, 0);
 
         size++;
+
+        if (bloom.isOverloaded()) {
+            recreateBloom();
+        } else {
+            bloom.append(value);
+        }
     }
 
     public synchronized void remove(long value) {
@@ -144,6 +159,19 @@ final class HammL3Cell {
         }
     }
 
+    private synchronized void recreateBloom() {
+        bloom.reallocate(size);
+
+        long valuesRunner = this.valuesPtr;
+        for (int i = 0; i < size; i++) {
+            long value = UNSAFE.getLong(valuesRunner);
+
+            bloom.append(value);
+
+            valuesRunner += VALUE_SIZE;
+        }
+    }
+
     public synchronized boolean contains(long value, int distance) {
         long valuesRunner = this.valuesPtr;
         for (int i = 0; i < size; i++) {
@@ -162,13 +190,15 @@ final class HammL3Cell {
     }
 
     public synchronized boolean contains(long value) {
-        long valuesRunner = this.valuesPtr;
-        for (int i = 0; i < size; i++) {
-            if (value == UNSAFE.getLong(valuesRunner)) {
-                return true;
-            }
+        if (bloom.contains(value)) {
+            long valuesRunner = this.valuesPtr;
+            for (int i = 0; i < size; i++) {
+                if (value == UNSAFE.getLong(valuesRunner)) {
+                    return true;
+                }
 
-            valuesRunner += VALUE_SIZE;
+                valuesRunner += VALUE_SIZE;
+            }
         }
 
         return false;
@@ -194,13 +224,15 @@ final class HammL3Cell {
     }
 
     public synchronized int count(long value) {
-        long valuesRunner = this.valuesPtr;
-        for (int i = 0; i < size; i++) {
-            if (value == UNSAFE.getLong(valuesRunner)) {
-                return 1;
-            }
+        if (bloom.contains(value)) {
+            long valuesRunner = this.valuesPtr;
+            for (int i = 0; i < size; i++) {
+                if (value == UNSAFE.getLong(valuesRunner)) {
+                    return 1;
+                }
 
-            valuesRunner += VALUE_SIZE;
+                valuesRunner += VALUE_SIZE;
+            }
         }
 
         return 0;

@@ -13,7 +13,7 @@ import junit.framework.Assert;
 
 public class HammL3RandomTest {
 
-    private static final int CAPACITY = 1000000;
+    private static final int CAPACITY = 10000000;
 
     private static Set<Long> values;
 
